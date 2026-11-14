@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Merger · Pengaturan</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#e8edf5;background:#0b1020;--panel:#131b2e;--line:#28334a;--muted:#9eabc1;--accent:#8bb8ff;--green:#8ee0b0;--warn:#ffd28a}*{box-sizing:border-box}body{margin:0}header{padding:25px max(20px,calc((100vw - 1100px)/2));border-bottom:1px solid var(--line);background:#0e1527;display:flex;align-items:center;justify-content:space-between;gap:20px}h1{font-size:22px;margin:0 0 5px}header p,.muted{color:var(--muted);margin:0;font-size:13px}.brand{display:flex;gap:13px;align-items:center}.logo{height:43px;width:43px;border-radius:13px;display:grid;place-items:center;background:#1c3153;color:var(--accent);font-size:23px}.pill{font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:20px;color:var(--green)}main{max-width:1100px;margin:25px auto;padding:0 20px 50px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px}.nav,.panel,.statuscard{background:var(--panel);border:1px solid var(--line);border-radius:15px}.nav{padding:10px;height:max-content;position:sticky;top:15px}.nav a{display:block;text-decoration:none;color:var(--muted);padding:11px 12px;border-radius:9px;font-size:14px}.nav a.active,.nav a:hover{background:#20314d;color:#fff}.content{min-width:0}.intro{margin:0 0 20px}.intro h2{margin:0 0 6px;font-size:21px}.intro p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}.panel{padding:21px;margin-bottom:16px;scroll-margin-top:15px}.panel h3{font-size:16px;margin:0 0 5px}.desc{font-size:13px;color:var(--muted);margin:0 0 19px;line-height:1.5}.field{margin-bottom:16px}.field:last-child{margin-bottom:0}label,.label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}input,select{font:inherit;color:#edf3ff;background:#0d1425;border:1px solid #35425c;border-radius:9px;padding:11px 12px;width:100%;min-width:0;outline:none}input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #8bb8ff22}.help{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.rootrow{display:flex;gap:8px;margin-bottom:9px}.rootrow input{flex:1}.smallbtn,.btn{border:1px solid var(--line);border-radius:9px;padding:10px 13px;background:#1a2740;color:#e9f1ff;cursor:pointer;font-weight:600}.smallbtn{flex:0 0 auto}.remove{color:#ffb3b3}.btn.primary{background:#9dc4ff;color:#10203a;border-color:#9dc4ff}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;bottom:10px;background:#10182aee;backdrop-filter:blur(10px);padding:12px;border:1px solid var(--line);border-radius:13px}.actions .right{display:flex;gap:8px}
+.checkrow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 12px 0;
+}
+
+.checkrow input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  margin: 1px 0 0;
+  accent-color: #9dc4ff;
+}
+
+.checkrow label {
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.checkrow small {
+  display: block;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 3px;
+}
+.notice{padding:12px 14px;border-radius:10px;background:#19253b;border:1px solid #344767;color:#c8d8f1;font-size:13px;line-height:1.5}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}.statuscard{padding:15px}.statuscard small{color:var(--muted);font-size:12px}.statuscard strong{display:block;font-size:15px;margin-top:6px;overflow-wrap:anywhere}.logbox{font:12px/1.7 ui-monospace,monospace;color:#b9c7dd;white-space:pre-wrap;max-height:190px;overflow:auto;background:#0a1020;border-radius:9px;padding:12px}.toast{display:none;padding:12px;border-radius:9px;margin-bottom:12px;font-size:13px}.toast.ok{display:block;background:#153225;color:#a5efc3}.toast.err{display:block;background:#3a2028;color:#ffc0c8}.hidden{display:none!important}.job-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}.joblist{display:grid;gap:10px}.jobrow{border:1px solid var(--line);background:#0e1628;border-radius:12px;padding:13px}.jobtop{display:flex;align-items:flex-start;gap:10px}.jobcheck{width:17px;flex:0 0 17px;margin-top:3px;accent-color:#9dc4ff}.jobmain{min-width:0;flex:1}.jobtitle{font-weight:700;overflow-wrap:anywhere}.jobmeta{font-size:12px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere;line-height:1.5}.jobbadge{font-size:11px;border-radius:20px;padding:5px 8px;white-space:nowrap;border:1px solid var(--line);background:#202a3e;color:#c9d5e8}.jobbadge.processing,.jobbadge.queued{background:#392e17;color:#ffdb91;border-color:#725823}.jobbadge.completed{background:#153525;color:#9ce8b7;border-color:#286243}.jobbadge.blocked,.jobbadge.failed{background:#3b2028;color:#ffb9c3;border-color:#713a46}.jobbadge.ready{background:#1c3153;color:#a9ccff;border-color:#345582}.progress-track{height:7px;background:#253149;border-radius:20px;overflow:hidden;margin-top:11px}.progress-fill{height:100%;width:0;background:#8bb8ff;border-radius:20px;transition:width .35s ease}.progress-fill.processing{background:#f4c66b}.progress-fill.completed{background:#8ee0b0}.progress-fill.failed,.progress-fill.blocked{background:#ff8f9f}.jobbottom{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:7px}.jobmessage{margin-top:8px;font-size:12px;line-height:1.45;color:#d0d9e8;overflow-wrap:anywhere}.jobempty{padding:20px;border:1px dashed #35425c;border-radius:10px;color:var(--muted);font-size:13px;text-align:center}.jobrow input[type=checkbox]:disabled{opacity:.35}@media(max-width:760px){main{grid-template-columns:1fr;margin-top:16px}.nav{position:static;display:flex;overflow:auto}.nav a{white-space:nowrap}.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr}header{padding:18px 20px}.pill{display:none}.panel{padding:17px}.actions{align-items:flex-start;flex-direction:column}.actions .right{width:100%}.actions .right button{flex:1}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">▶</div>
+    <div><h1>Video Merger</h1><p>Pengaturan sumber, encoding, dan otomatisasi</p></div>
+  </div>
+  <div class="pill">● Konfigurasi lokal</div>
+</header>
+<main>
+<nav class="nav">
+  <a class="active" href="#jobs">Daftar judul</a>
+  <a href="#sources">Direktori sumber</a>
+  <a href="#automation">Otomatisasi</a>
+  <a href="#youtube">Upload YouTube</a>
+  <a href="#equalizer">Equalizer</a>
+  <a href="#output">Output & kualitas</a>
+  <a href="#rules">Aturan proses</a>
+  <a href="#system">Status sistem</a>
+</nav>
+<div class="content">
+<div class="intro">
+  <h2>Pengaturan aplikasi</h2>
+  <p>Sesuaikan dengan kapasitas server dan struktur folder Anda. Perubahan disimpan di server dan diterapkan pada scheduler setelah menekan Simpan.</p>
+</div>
+<div id="toast" class="toast"></div>
+
+<section class="panel" id="jobs">
+  <h3>Daftar judul & progres pemrosesan</h3>
+  <p class="desc">Setiap folder lagu berisi file audio langsung. Pilih kategori asset video, aktifkan merge bila diperlukan, dan centang AutoCaption untuk membuat subtitle otomatis. Bahasa subtitle dapat dipilih Indonesia atau English. Semua pilihan per judul harus disimpan.</p>
+  <div class="stats">
+    <div class="statuscard"><small>Sedang diproses</small><strong id="countProcessing">0</strong></div>
+    <div class="statuscard"><small>Menunggu / siap</small><strong id="countWaiting">0</strong></div>
+    <div class="statuscard"><small>Selesai / perlu perhatian</small><strong id="countDone">0 / 0</strong></div>
+  </div>
+  <div class="job-toolbar">
+    <label for="statusFilter" style="align-self:center;margin:0">Filter status</label>
+    <select id="statusFilter" style="width:auto;min-width:175px">
+      <option value="active" selected>Aktif (processing, queued, ready)</option>
+      <option value="all">Semua status</option>
+      <option value="processing">Sedang diproses</option>
+      <option value="queued">Dalam antrean</option>
+      <option value="ready">Siap diproses</option>
+      <option value="unstable">Menunggu file stabil</option>
+      <option value="blocked">Diblokir durasi</option>
+      <option value="completed">Selesai</option>
+      <option value="failed">Gagal</option>
+    </select>
+    <button class="btn" id="processAll" type="button">▶ Proses semua yang diaktifkan</button>
+    <button class="btn primary" id="saveTitleOptions" type="button">Simpan pilihan judul</button>
+  </div>
+  <div id="jobList" class="joblist"><div class="jobempty">Belum ada judul. Tekan Scan sekarang untuk memindai direktori sumber.</div></div>
+</section>
+
+<div class="stats">
+  <div class="statuscard"><small>Terakhir scan</small><strong id="lastScan">Belum ada</strong></div>
+  <div class="statuscard"><small>Hasil scan terakhir</small><strong id="scanSummary">Belum ada pemindaian</strong></div>
+  <div class="statuscard"><small>FFmpeg / FFprobe</small><strong id="ffStatus">Memeriksa…</strong></div>
+</div>
+
+<section class="panel" id="sources">
+  <h3>Direktori sumber</h3>
+  <p class="desc">Setiap folder judul berisi file audio langsung, tanpa subfolder audio/ atau video/. Asset video disimpan terpisah berdasarkan kategori di direktori project ./video/.</p>
+  <div id="roots"></div>
+  <button class="smallbtn" id="addRoot" type="button">＋ Tambah direktori</button>
+  <div class="field" style="margin-top:20px">
+    <label for="videoAssetDirectory">Direktori asset video</label>
+    <input id="videoAssetDirectory" placeholder="/path/ke/project/video">
+    <div class="help">Berisi subfolder kategori seperti default, protest, car, nature, motor, dll.</div>
+  </div>
+  <div class="field">
+    <label for="outputDirectory">Direktori output</label>
+    <input id="outputDirectory" placeholder="/mnt/data/media/output">
+    <div class="help">Folder hasil akan dibuat sebagai output/Judul_Lagu/Judul_Lagu.mp4.</div>
+  </div>
+</section>
+
+<section class="panel" id="automation">
+  <h3>Otomatisasi & jadwal</h3>
+  <p class="desc">Pemindaian dapat berjalan di latar belakang walaupun browser ditutup, selama layanan server aktif.</p>
+  <div class="field">
+    <label for="scanMode">Mode operasi</label>
+    <select id="scanMode">
+      <option value="manual">Manual saja</option>
+      <option value="watch">Scan berkala</option>
+      <option value="schedule">Jadwal harian</option>
+      <option value="both">Scan berkala + jadwal harian</option>
+    </select>
+  </div>
+  <div class="checkrow">
+    <input type="checkbox" id="dailyScheduleEnabled">
+    <label for="dailyScheduleEnabled">Aktifkan proses terjadwal harian<small>Jika aktif, server menjalankan scan dan antrean merge otomatis pada waktu yang ditentukan.</small></label>
+  </div>
+  <div class="grid2">
+    <div class="field" id="intervalWrap">
+      <label for="scanIntervalMinutes">Interval scan (menit)</label>
+      <input id="scanIntervalMinutes" type="number" min="1" max="1440">
+      <div class="help">Rentang 1–1440 menit.</div>
+    </div>
+    <div class="field">
+      <label for="dailyScheduleTime">Waktu proses harian</label>
+      <input id="dailyScheduleTime" type="time" step="60" value="02:00">
+      <div class="help">Isi jam dan menit (format 24 jam).</div>
+    </div>
+    <div class="field">
+      <label for="timezone">Zona waktu</label>
+      <select id="timezone">
+        <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
+        <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
+        <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
+        <option value="UTC">UTC</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="parallelJobs">Encoding bersamaan</label>
+      <select id="parallelJobs">
+        <option value="1">1 proses — paling ringan</option>
+        <option value="2">2 proses</option>
+        <option value="3">3 proses</option>
+        <option value="4">4 proses</option>
+        <option value="5">5 proses</option>
+        <option value="6">6 proses</option>
+        <option value="7">7 proses</option>
+        <option value="8">8 proses</option>
+      </select>
+    </div>
+  </div>
+  <div class="notice">Worker FFmpeg aktif. Scan otomatis hanya memasukkan judul yang sudah dicentang Aktifkan merge dan disimpan.</div>
+</section>
+
+<section class="panel" id="youtube">
+  <h3>Upload YouTube</h3>
+  <p class="desc">Atur apakah video yang selesai digabungkan otomatis dikirim ke YouTube.</p>
+  <div class="checkrow">
+    <input type="checkbox" id="youtubeAutoUploadEnabled">
+    <label for="youtubeAutoUploadEnabled">
+      Aktifkan upload otomatis ke YouTube
+      <small>ON: video yang selesai di-merge dapat masuk ke proses upload. OFF: upload otomatis dilewati.</small>
+    </label>
+  </div>
+  <div class="notice">Pengaturan ini hanya mengendalikan upload otomatis setelah merge tanpa menghapus hasil merge lokal.</div>
+</section>
+
+<section class="panel" id="equalizer">
+  <h3>Visualizer Equalizer Audio</h3>
+  <p class="desc">Tampilkan animasi gelombang atau batang frekuensi audio di atas video hasil penggabungan.</p>
+  <div class="checkrow">
+    <input type="checkbox" id="equalizerEnabled">
+    <label for="equalizerEnabled">Aktifkan Visualizer Equalizer<small>Merender efek visual berdasarkan audio pada video akhir.</small></label>
+  </div>
+  <div class="grid2">
+    <div class="field">
+      <label for="equalizerStyle">Gaya Visualizer</label>
+      <select id="equalizerStyle">
+        <option value="bars">Batang Frekuensi (Bars)</option>
+        <option value="waveform">Gelombang Audio (Waveform)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="equalizerPosition">Posisi Equalizer</label>
+      <select id="equalizerPosition">
+        <option value="bottom">Bawah (Bottom)</option>
+        <option value="center">Tengah (Center)</option>
+        <option value="top">Atas (Top)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="equalizerColor">Warna Visualizer</label>
+      <select id="equalizerColor">
+        <option value="white">Putih (White)</option>
+        <option value="cyan">Cyan</option>
+        <option value="purple">Ungu (Purple)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="equalizerOpacity">Opacity / Transparansi (%)</label>
+      <input id="equalizerOpacity" type="number" min="10" max="100">
+      <div class="help">Rentang 10–100%.</div>
+    </div>
+    <div class="field">
+      <label for="equalizerHeight">Tinggi Visualizer (% dari layar)</label>
+      <input id="equalizerHeight" type="number" min="10" max="50">
+      <div class="help">Rentang 10–50%.</div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="output">
+  <h3>Resolusi & kualitas output</h3>
+  <p class="desc">Output 16:9. Video portrait atau rasio lain ditempatkan di tengah dengan latar blur dari video yang sama.</p>
+  <div class="grid2">
+    <div class="field">
+      <label for="outputHeight">Resolusi output</label>
+      <select id="outputHeight">
+        <option value="720">1280 × 720 (HD)</option>
+        <option value="1080">1920 × 1080 (Full HD)</option>
+        <option value="1440">2560 × 1440 (QHD)</option>
+        <option value="2160">3840 × 2160 (4K)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="videoCodec">Video codec</label>
+      <select id="videoCodec">
+        <option value="libx264">H.264 — kompatibilitas luas</option>
+        <option value="libx265">H.265 / HEVC — ukuran lebih kecil</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="crf">Kualitas (CRF)</label>
+      <input id="crf" type="number" min="16" max="30">
+      <div class="help">Angka lebih rendah berarti kualitas lebih tinggi.</div>
+    </div>
+    <div class="field">
+      <label for="preset">Kecepatan encoding</label>
+      <select id="preset">
+        <option>ultrafast</option><option>veryfast</option><option>faster</option><option>fast</option><option>medium</option><option>slow</option><option>slower</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="rules">
+  <h3>Aturan proses</h3>
+  <p class="desc">Asset video adalah kumpulan klip pilihan yang diacak tanpa pengulangan klip dalam satu urutan.</p>
+  <div class="checkrow"><input type="checkbox" checked disabled id="loopPolicy"><label for="loopPolicy">Loop seluruh urutan video jika total durasinya lebih pendek dari audio.<small>Audio menjadi acuan durasi akhir.</small></label></div>
+  <div class="checkrow"><input type="checkbox" checked disabled id="blurPolicy"><label for="blurPolicy">Gunakan latar blur jika rasio video tidak sama dengan 16:9.<small>Gambar utama tidak dipotong.</small></label></div>
+  <div class="checkrow"><input type="checkbox" checked disabled id="assetRandomPolicy"><label for="assetRandomPolicy">Acak urutan asset video tanpa duplikasi klip.<small>Klip tidak diulang sebelum siklus selesai.</small></label></div>
+  <div class="checkrow"><input type="checkbox" id="retryEnabled"><label for="retryEnabled">Coba ulang otomatis jika pekerjaan gagal.<small>Hanya pekerjaan gagal dengan batas tertentu.</small></label></div>
+  <div class="field" style="margin-left:27px"><label for="retryLimit">Maksimal percobaan ulang</label><input id="retryLimit" type="number" min="0" max="10"></div>
+  <div class="field"><label for="stableFileSeconds">Waktu file harus stabil (detik)</label><input id="stableFileSeconds" type="number" min="5" max="3600"><div class="help">Mencegah file yang masih disalin ikut diproses.</div></div>
+</section>
+
+<section class="panel" id="system">
+  <h3>Status sistem & log</h3>
+  <p class="desc">Informasi scheduler, hasil scan terakhir, dan log pemrosesan.</p>
+  <button class="smallbtn" id="scanNow" type="button">↻ Scan sekarang</button>
+  <div class="help" style="margin:10px 0">Log aktivitas terbaru</div>
+  <div id="logs" class="logbox">Memuat log…</div>
+
+  <div class="help" style="margin:20px 0 10px 0">Log YouTube Uploader</div>
+  <div id="youtubeLogs" class="logbox">Belum ada log uploader YouTube…</div>
+</section>
+
+<div class="actions">
+  <span class="muted" id="saveState">Perubahan belum disimpan</span>
+  <div class="right">
+    <button class="btn" id="reload" type="button">Muat ulang</button>
+    <button class="btn primary" id="save" type="button">Simpan pengaturan</button>
+  </div>
+</div>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let original = null;
+let latestJobs = [];
+let videoCategories = [];
+const titleOptionsDraft = new Map();
+const fields=[
+  'outputDirectory','videoAssetDirectory','scanMode','scanIntervalMinutes','dailyScheduleEnabled','dailyScheduleTime','timezone','parallelJobs',
+  'youtubeAutoUploadEnabled','outputHeight','videoCodec','crf','preset',
+  'equalizerEnabled','equalizerStyle','equalizerPosition','equalizerColor','equalizerOpacity','equalizerHeight',
+  'retryEnabled','retryLimit','stableFileSeconds'
+];
+const labels={ready:'Siap diproses',blocked:'Diblokir durasi',unstable:'Menunggu file stabil',queued:'Dalam antrean',processing:'Sedang diproses',completed:'Selesai',failed:'Gagal'};
+
+function showToast(msg, ok=true) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (ok ? 'ok' : 'err');
+  setTimeout(() => t.className = 'toast', 6000);
+}
+
+function renderRoots(roots) {
+  $('roots').innerHTML = '';
+  roots.forEach((root, i) => {
+    const row = document.createElement('div');
+    row.className = 'rootrow';
+    const input = document.createElement('input');
+    input.className = 'rootpath';
+    input.value = root;
+    input.placeholder = '/path/ke/direktori/sumber';
+    input.setAttribute('aria-label', 'Direktori sumber ' + (i + 1));
+    const btn = document.createElement('button');
+    btn.className = 'smallbtn remove';
+    btn.type = 'button';
+    btn.textContent = 'Hapus';
+    btn.onclick = () => { row.remove(); dirty(); };
+    row.append(input, btn);
+    $('roots').append(row);
+    input.addEventListener('input', dirty);
+  });
+}
+
+function getValues() {
+  const o = {};
+  fields.forEach(k => {
+    const el = $(k);
+    o[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) : el.value;
+  });
+  o.sourceDirectories = [...document.querySelectorAll('.rootpath')].map(x => x.value.trim()).filter(Boolean);
+  o.outputHeight = Number(o.outputHeight);
+  o.outputWidth = Math.round(o.outputHeight * 16 / 9);
+  o.parallelJobs = Number(o.parallelJobs);
+  return o;
+}
+
+function setValues(s) {
+  fields.forEach(k => {
+    if (s[k] !== undefined) {
+      const el = $(k);
+      if (el.type === 'checkbox') el.checked = Boolean(s[k]);
+      else if (k === 'dailyScheduleTime') el.value = String(s[k] || '02:00').slice(0, 5);
+      else el.value = s[k];
+    }
+  });
+  renderRoots(s.sourceDirectories || []);
+  original = JSON.stringify(getValues());
+  $('saveState').textContent = 'Pengaturan tersimpan dari settings.json';
+  updateMode();
+}
+
+function dirty() {
+  $('saveState').textContent = 'Ada perubahan yang belum disimpan';
+}
+
+function updateMode() {
+  const mode = $('scanMode').value;
+  $('intervalWrap').classList.toggle('hidden', !['watch', 'both'].includes(mode));
+  $('dailyScheduleTime').disabled = false;
+  $('timezone').disabled = false;
+  const scheduleMode = ['schedule', 'both'].includes(mode);
+  $('dailyScheduleEnabled').disabled = !scheduleMode;
+  $('dailyScheduleEnabled').title = scheduleMode ? 'Aktifkan atau nonaktifkan jadwal harian' : 'Pilih mode Jadwal harian atau Scan berkala + jadwal harian';
+}
+
+async function load() {
+  try {
+    $('saveState').textContent = 'Memuat pengaturan dari settings.json…';
+    const r = await fetch('/api/settings', { cache: 'no-store' });
+    if (!r.ok) throw Error('Tidak dapat membaca pengaturan dari server (/api/settings)');
+    const settings = await r.json();
+    setValues(settings);
+    await refreshCategories();
+    await refreshStatus();
+    await health();
+    await refreshTitles();
+  } catch (e) {
+    $('saveState').textContent = 'Pengaturan belum berhasil dimuat';
+    showToast(e.message, false);
+  }
+}
+
+async function refreshStatus() {
+  try {
+    const s = await (await fetch('/api/status')).json();
+    $('lastScan').textContent = s.lastScanAt ? new Date(s.lastScanAt).toLocaleString() : 'Belum ada';
+    $('scanSummary').textContent = s.lastScanSummary;
+    $('logs').textContent = (s.logs || []).join('\n') || 'Belum ada aktivitas.';
+    
+    if ($('youtubeLogs')) {
+      $('youtubeLogs').textContent = (s.youtubeLogs || s.ytLogs || []).join('\n') || 'Belum ada log uploader YouTube…';
+    }
+
+    const c = s.counts || {};
+    $('countProcessing').textContent = (c.processing || 0) + ' berjalan · ' + (c.queued || 0) + ' antre';
+    $('countWaiting').textContent = (c.ready || 0) + ' siap · ' + (c.unstable || 0) + ' menunggu';
+    $('countDone').textContent = (c.completed || 0) + ' selesai / ' + ((c.blocked || 0) + (c.failed || 0)) + ' perhatian';
+  } catch {}
+}
+
+async function health() {
+  try {
+    const h = await (await fetch('/api/health')).json();
+    $('ffStatus').textContent = 'FFmpeg ' + (h.checks.ffmpeg ? 'OK' : 'tidak ada') + ' · FFprobe ' + (h.checks.ffprobe ? 'OK' : 'tidak ada');
+    $('ffStatus').style.color = h.checks.ffmpeg && h.checks.ffprobe ? 'var(--green)' : 'var(--warn)';
+  } catch {
+    $('ffStatus').textContent = 'Tidak dapat memeriksa';
+  }
+}
+
+function fmt(n) {
+  if (!Number.isFinite(n)) return '—';
+  const ms = Math.round(n * 1000), h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000), x = ms % 1000;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(x).padStart(3, '0')}`;
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
+$('processAll').onclick = async () => {
+  const button = $('processAll');
+  button.disabled = true;
+  try {
+    const response = await fetch('/api/process-all', { method: 'POST' });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Gagal memproses judul.');
+    showToast(`Masuk antrean: ${data.queued || 0} judul.`);
+    await refreshTitles();
+    await refreshStatus();
+  } catch (error) {
+    showToast(error.message, false);
+  } finally {
+    button.disabled = false;
+  }
+};
+
+function renderJobs() {
+  const list = $('jobList');
+  const filter = $('statusFilter')?.value || 'active';
+
+  const visibleJobs = latestJobs.filter(j => {
+    if (filter === 'all') return true;
+    if (filter === 'active') return ['processing', 'queued', 'ready'].includes(j.status);
+    return j.status === filter;
+  });
+
+  if (!visibleJobs.length) {
+    list.innerHTML = '<div class="jobempty">Tidak ada judul untuk filter ini.</div>';
+    return;
+  }
+
+  list.innerHTML = visibleJobs.map(j => {
+    const draft = titleOptionsDraft.get(j.id) || {};
+    const mergeEnabled = draft.mergeEnabled ?? (j.mergeEnabled === true);
+    const videoCategory = draft.videoCategory ?? (j.videoCategory || 'default');
+    const autoCaptionEnabled = draft.autoCaptionEnabled ?? (j.autoCaptionEnabled === true);
+    const autoCaptionLanguage = draft.autoCaptionLanguage ?? (j.autoCaptionLanguage === 'en' ? 'en' : 'id');
+    const locked = ['processing', 'queued'].includes(j.status);
+
+    const categoryOptions = [...new Set([videoCategory, ...videoCategories])].map(category =>
+      `<option value="${esc(category)}" ${category === videoCategory ? 'selected' : ''}>${esc(category)}</option>`
+    ).join('');
+
+    const pct = Math.max(0, Math.min(100, Number(j.progress) || 0));
+
+    return `
+      <article class="jobrow">
+        <div class="jobtop">
+          <div class="jobmain">
+            <div class="jobtitle">${esc(j.title)}</div>
+
+            <div class="checkrow" style="margin:10px 0 8px">
+              <input
+                type="checkbox"
+                data-merge-enabled="${esc(j.id)}"
+                ${mergeEnabled ? 'checked' : ''}
+                ${locked ? 'disabled' : ''}
+                aria-label="Aktifkan merge untuk ${esc(j.title)}"
+              >
+              <label>
+                Aktifkan merge
+                <small>Dicentang dan disimpan berarti judul ini boleh diproses manual maupun otomatis.</small>
+              </label>
+            </div>
+
+            <div class="field" style="margin:0 0 10px">
+              <label style="margin-bottom:5px">Sumber video</label>
+              <select data-video-category="${esc(j.id)}" ${locked ? 'disabled' : ''}>${categoryOptions}</select>
+            </div>
+
+            <div class="checkrow" style="margin:10px 0 8px">
+              <input
+                type="checkbox"
+                data-auto-caption-enabled="${esc(j.id)}"
+                ${autoCaptionEnabled ? 'checked' : ''}
+                ${locked ? 'disabled' : ''}
+                aria-label="Aktifkan AutoCaption untuk ${esc(j.title)}"
+              >
+              <label>
+                Buat AutoCaption
+                <small>Demucs memisahkan vokal dari MP3 sumber; AutoCaption hanya membuat subtitle (--no-burn). Subtitle dibakar saat encoding video final.</small>
+              </label>
+            </div>
+
+            <div class="field" style="margin:0 0 10px">
+              <label style="margin-bottom:5px">Bahasa AutoCaption</label>
+              <select data-auto-caption-language="${esc(j.id)}" ${locked || !autoCaptionEnabled ? 'disabled' : ''}>
+                <option value="id" ${autoCaptionLanguage === 'id' ? 'selected' : ''}>Indonesia (id)</option>
+                <option value="en" ${autoCaptionLanguage === 'en' ? 'selected' : ''}>English (en)</option>
+              </select>
+            </div>
+
+            <div class="jobmeta">
+              Audio: ${esc(j.audioFile || 'Tidak ditemukan')}<br>
+              ${(() => {
+                const files = j.videoFilesByCategory?.[videoCategory] ?? (
+                  videoCategory === j.videoCategory ? j.videoFiles : []
+                );
+                const duration = j.videoDurationByCategory?.[videoCategory] ?? (
+                  videoCategory === j.videoCategory ? j.videoDuration : 0
+                );
+                return `${files.length} klip tersedia · total pool ${fmt(duration)} · audio ${fmt(j.audioDuration)}`;
+              })()}<br>
+              Output: ${esc(j.outputFile)}
+            </div>
+
+          </div>
+
+          <span class="jobbadge ${esc(j.status)}">${labels[j.status] || esc(j.status)}</span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill ${esc(j.status)}" style="width:${pct}%"></div>
+        </div>
+
+        <div class="jobbottom">
+          <span>${esc(j.stage || '')}</span>
+          <strong>${pct}%</strong>
+        </div>
+
+        <div class="jobmessage">${esc(j.message || '')}</div>
+        ${j.error && j.status === 'failed' ? `<div class="jobmessage" style="color:#ffb9c3">${esc(j.error)}</div>` : ''}
+      </article>
+    `;
+  }).join('');
+
+  list.querySelectorAll('[data-merge-enabled]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = el.dataset.mergeEnabled;
+      const previous = titleOptionsDraft.get(id) || {};
+      titleOptionsDraft.set(id, { ...previous, mergeEnabled: el.checked });
+      dirty();
+    });
+  });
+
+  list.querySelectorAll('[data-video-category]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = el.dataset.videoCategory;
+      const previous = titleOptionsDraft.get(id) || {};
+      titleOptionsDraft.set(id, { ...previous, videoCategory: el.value });
+      dirty();
+    });
+  });
+
+  list.querySelectorAll('[data-auto-caption-enabled]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = el.dataset.autoCaptionEnabled;
+      const previous = titleOptionsDraft.get(id) || {};
+      titleOptionsDraft.set(id, { ...previous, autoCaptionEnabled: el.checked });
+      const languageSelect = list.querySelector(`[data-auto-caption-language="${CSS.escape(id)}"]`);
+      if (languageSelect) languageSelect.disabled = !el.checked;
+      dirty();
+    });
+  });
+
+  list.querySelectorAll('[data-auto-caption-language]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = el.dataset.autoCaptionLanguage;
+      const previous = titleOptionsDraft.get(id) || {};
+      titleOptionsDraft.set(id, { ...previous, autoCaptionLanguage: el.value });
+      dirty();
+    });
+  });
+}
+
+async function refreshCategories() {
+  try {
+    const d = await (await fetch('/api/video-categories')).json();
+    videoCategories = d.categories || [];
+    if (videoCategories.length === 0) showToast('Folder asset video belum ditemukan atau belum memiliki kategori.', false);
+  } catch {}
+}
+
+let refreshTitlesInFlight = false;
+
+async function refreshTitles(options = {}) {
+  // Hindari request polling bertumpuk dan render yang mengganti DOM saat
+  // pengguna sedang membuka/mengoperasikan kontrol di daftar judul.
+  if (refreshTitlesInFlight) return;
+  const forceRender = options.force === true;
+  const active = document.activeElement;
+  const interactingWithJobs = $('jobList').contains(active) &&
+    active.matches('select, input, button, textarea');
+
+  refreshTitlesInFlight = true;
+  try {
+    const response = await fetch('/api/titles', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Gagal memuat daftar judul.');
+    const data = await response.json();
+    latestJobs = data.jobs || [];
+    const valid = new Set(latestJobs.map(j => j.id));
+    for (const id of titleOptionsDraft.keys()) {
+      if (!valid.has(id)) titleOptionsDraft.delete(id);
+    }
+
+    // Jangan membangun ulang jobList selama dropdown/checkbox sedang fokus.
+    // Pilihan draft tetap tersimpan dan akan dipakai pada render berikutnya.
+    const activeAfterFetch = document.activeElement;
+    const stillInteracting = $('jobList').contains(activeAfterFetch) &&
+      activeAfterFetch.matches('select, input, button, textarea');
+    if (forceRender || (!interactingWithJobs && !stillInteracting)) {
+      renderJobs();
+    }
+  } catch (error) {
+    console.error('Gagal memuat judul:', error);
+  } finally {
+    refreshTitlesInFlight = false;
+  }
+}
+
+$('statusFilter').onchange = renderJobs;
+$('addRoot').onclick = () => { const roots = [...document.querySelectorAll('.rootpath')].map(x => x.value); roots.push(''); renderRoots(roots); dirty(); };
+$('scanMode').onchange = () => { updateMode(); dirty(); };
+fields.forEach(k => $(k).addEventListener('input', dirty));
+
+$('save').onclick = async () => {
+  try {
+    const r = await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(getValues()) });
+    const d = await r.json();
+    if (!r.ok) throw Error(d.error || 'Gagal menyimpan');
+    setValues(d.settings);
+    await refreshCategories();
+    await refreshTitles();
+    showToast('Pengaturan berhasil disimpan dan scheduler diperbarui.');
+    await refreshStatus();
+  } catch (e) {
+    showToast(e.message, false);
+  }
+};
+
+const saveTitleOptionsButton = $('saveTitleOptions');
+if (saveTitleOptionsButton) {
+  saveTitleOptionsButton.addEventListener('click', async () => {
+    const button = saveTitleOptionsButton;
+    if (button.disabled) return;
+    button.disabled = true;
+    const previousText = button.textContent;
+    button.textContent = 'Menyimpan...';
+
+    try {
+      const items = latestJobs.map(j => {
+        const draft = titleOptionsDraft.get(j.id) || {};
+        return {
+          id: j.id,
+          mergeEnabled: draft.mergeEnabled ?? (j.mergeEnabled === true),
+          videoCategory: draft.videoCategory ?? (j.videoCategory || 'default'),
+          autoCaptionEnabled: draft.autoCaptionEnabled ?? (j.autoCaptionEnabled === true),
+          autoCaptionLanguage: draft.autoCaptionLanguage ?? (j.autoCaptionLanguage === 'en' ? 'en' : 'id')
+        };
+      });
+
+      const response = await fetch('/api/title-options', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Gagal menyimpan pilihan judul');
+
+      titleOptionsDraft.clear();
+      await refreshTitles();
+      await refreshStatus();
+      showToast('Pilihan judul berhasil disimpan.');
+    } catch (error) {
+      showToast(error.message || 'Terjadi kesalahan saat menyimpan pilihan judul.', false);
+    } finally {
+      button.disabled = false;
+      button.textContent = previousText;
+    }
+  });
+}
+
+$('reload').onclick = load;
+$('scanNow').onclick = async () => {
+  const b = $('scanNow');
+  b.disabled = true;
+  b.textContent = 'Memindai…';
+  try {
+    const r = await fetch('/api/scan', { method: 'POST' });
+    const d = await r.json();
+    showToast(d.lastScanSummary);
+    await refreshStatus();
+    await refreshTitles();
+  } catch (e) {
+    showToast(e.message, false);
+  } finally {
+    b.disabled = false;
+    b.textContent = '↻ Scan sekarang';
+  }
+};
+
+load();
+// Status dipolling berkala. refreshTitles menjaga progres job tetap segar,
+ // tetapi tidak akan mengganti DOM ketika kontrol daftar judul sedang digunakan.
+setInterval(() => {
+  refreshStatus();
+  refreshTitles();
+}, 2500);
+</script>
+</body>
+</html>
