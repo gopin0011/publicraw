@@ -110,6 +110,23 @@ function getMediaOrientation(item) {
   return height > width ? 'portrait' : 'landscape';
 }
 
+
+function getMediaOrientation(width, height) {
+  width = Number(width || 0);
+  height = Number(height || 0);
+
+  if (!width || !height) return 'unknown';
+
+  const ratio = width / height;
+
+  if (ratio >= 0.95 && ratio <= 1.05) {
+    return 'square';
+  }
+
+  return height > width ? 'portrait' : 'landscape';
+}
+
+
 function filterAssetsByOrientation(items, target) {
   const exact = [];
   const square = [];
@@ -137,83 +154,142 @@ let completedCatalogCache = {
   assets: []
 };
 
-function loadCompletedCatalogAssets(){
-  const file=mediaLibraryPath();
 
-  if(!exists(file)){
+function loadCompletedCatalogAssets() {
+  const file = mediaLibraryPath();
+
+  if (!exists(file)) {
     throw Error(`Media Library JSON tidak ditemukan: ${file}. Atur MEDIA_LIBRARY_PATH di .env.`);
   }
 
-  const root=path.resolve(mediaRoot());
-  const stat=fs.statSync(file);
-  const cacheKey=`${file}:${stat.mtimeMs}:${stat.size}:${root}`;
+  const catalog = readJson(file);
 
-  // Katalog belum berubah: gunakan hasil parsing sebelumnya.
-  if(completedCatalogCache.key===cacheKey){
-    return completedCatalogCache.assets;
-  }
-
-  const catalog=readJson(file);
-
-  if(!Array.isArray(catalog.videos)){
+  if (!Array.isArray(catalog.videos)) {
     throw Error('Format media-library.json tidak valid: properti videos harus berupa array.');
   }
 
-  const assets=[];
+  const root = path.resolve(mediaRoot());
 
-  for(const v of catalog.videos){
-    if(v?.visual_analysis?.status!=='completed'||!v?.file?.path)continue;
+  const completed = catalog.videos.filter(video =>
+    video?.visual_analysis?.status === 'completed' &&
+    video?.file?.path &&
+    exists(video.file.path)
+  )
+  .filter(video =>
+    mediaExtensions.has(path.extname(video.file.path).toLowerCase())
+  )
+  .filter(video => {
+    const filePath = path.resolve(video.file.path);
+    return filePath === root || filePath.startsWith(root + path.sep);
+  });
 
-    const absolutePath=path.resolve(v.file.path);
+  // PENTING:
+  // Variabel video hanya digunakan di dalam callback map ini.
+  // Jangan memindahkan video.technical ke luar callback.
+  return completed.map(video => {
+    const width = Number(video.technical?.width || 0);
+    const height = Number(video.technical?.height || 0);
 
-    if(!absolutePath.startsWith(root+path.sep))continue;
-    if(!mediaExtensions.has(path.extname(absolutePath).toLowerCase()))continue;
-    if(!exists(absolutePath))continue;
+    return {
+      id: String(video.id),
+      path: path.resolve(video.file.path),
+      relative: path.relative(
+        root,
+        path.resolve(video.file.path)
+      ).split(path.sep).join('/'),
 
-    const relative=path.relative(root,absolutePath).split(path.sep).join('/');
-    const content=v.content||{};
-    const visual=v.visual_analysis||{};
-    
+      filename: video.file.name || path.basename(video.file.path),
+      category: (
+        path.relative(root, path.resolve(video.file.path))
+          .split(path.sep)[0] || 'default'
+      ),
 
-    assets.push({
-      id:String(v.id),
-      path:absolutePath,
-      relative,
-      filename:v.file.name||path.basename(absolutePath),
-      category:relative.split('/')[0]||'default',
-      duration:Number(v.technical?.duration_seconds||0),
+      duration: Number(video.technical?.duration_seconds || 0),
 
-      title:content.title||visual.title||v.title||v.file.name||path.basename(absolutePath),
-      description:content.description||visual.description||v.description||'',
-      summary:content.summary||visual.summary||'',
+      width,
+      height,
+      orientation: getMediaOrientation(width, height),
 
-      objects:content.objects||visual.objects||[],
-      activities:content.activities||visual.activities||[],
+      title: video.content?.title ||
+        video.title ||
+        video.file.name ||
+        path.basename(video.file.path),
 
-      environment:content.environment||visual.environment||'',
-      location_type:content.location_type||visual.location_type||'',
+      description: video.content?.description || video.description || '',
+      summary: video.content?.summary || '',
 
-      mood:content.mood||visual.mood||[],
-      tags:content.tags||visual.tags||v.tags||[],
-      keywords:content.keywords||visual.keywords||[],
-      categories:content.categories||visual.categories||[],
-      story_uses:content.story_uses||visual.story_uses||[]
-    });
+      objects: Array.isArray(video.content?.objects)
+        ? video.content.objects : [],
+
+      activities: Array.isArray(video.content?.activities)
+        ? video.content.activities : [],
+
+      environment: video.content?.environment || '',
+      location_type: video.content?.location_type || '',
+
+      mood: Array.isArray(video.content?.mood)
+        ? video.content.mood : [],
+
+      tags: Array.isArray(video.content?.tags)
+        ? video.content.tags
+        : Array.isArray(video.tags) ? video.tags : [],
+
+      keywords: Array.isArray(video.content?.keywords)
+        ? video.content.keywords : [],
+
+      categories: Array.isArray(video.content?.categories)
+        ? video.content.categories : [],
+
+      story_uses: Array.isArray(video.content?.story_uses)
+        ? video.content.story_uses : []
+    };
+  });
+}
+
+function filterAssetsByOrientation(assets, targetOrientation) {
+  const exact = [];
+  const square = [];
+  const unknown = [];
+  const opposite = [];
+
+  for (const asset of assets) {
+    const orientation = asset.orientation || 'unknown';
+
+    if (orientation === targetOrientation) {
+      exact.push(asset);
+    } else if (orientation === 'square') {
+      square.push(asset);
+    } else if (orientation === 'unknown') {
+      unknown.push(asset);
+    } else {
+      opposite.push(asset);
+    }
   }
 
-  completedCatalogCache={
-    key:cacheKey,
-    assets,
-    width: Number(v.technical?.width || 0),
-    height: Number(v.technical?.height || 0),
-    orientation: getMediaOrientation({
-      width: v.technical?.width,
-      height: v.technical?.height
-    }),
-  };
+  // Prioritas: orientasi tepat, square, lalu unknown.
+  const preferred = [...exact, ...square, ...unknown];
 
-  return assets;
+  // Orientasi berlawanan hanya jika tidak ada kandidat
+  // dengan orientasi tepat, square, maupun unknown.
+  if (preferred.length) {
+    return {
+      assets: preferred,
+      fallback: false,
+      exactCount: exact.length,
+      squareCount: square.length,
+      unknownCount: unknown.length
+    };
+  }
+
+  return {
+    assets: opposite,
+    fallback: opposite.length > 0,
+    exactCount: 0,
+    squareCount: 0,
+    unknownCount: 0
+  };
 }
+
 function englishTokens(value){
   return String(value||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,' ')
     .split(/\s+/).filter(x=>x.length>2);
@@ -270,99 +346,325 @@ async function callAutoAssignProvider(prompt,provider,model,ai){
   if(!content)throw Error('OpenRouter returned empty content.');
   return content;
 }
-async function aiAssignMediaToStoryboard(project){
-  const assets=loadCompletedCatalogAssets();
-  const targetOrientation = project.settings?.orientation || 'landscape';
-  const orientedAssets = filterAssetsByOrientation(assets, targetOrientation);
-  if(!assets.length)throw Error(`Tidak ada video berstatus completed yang valid di ${mediaLibraryPath()}. Periksa MEDIA_ROOT dan file.path pada katalog.`);
-  const ai=cfg.ai||{provider:'openrouter'},provider=selectedProvider(ai);
-  if(!['openrouter','ollama'].includes(provider))throw Error(`Unsupported AI provider: ${provider}`);
-  const models=Array.isArray(ai.models)&&ai.models.length?ai.models:[ai.model||''];
-  const model=provider==='ollama'?(project.settings?.ollamaModel||cfg.ollama?.model||'llama3:latest'):
-    (models.includes(project.settings?.aiModel)?project.settings.aiModel:(ai.model||models[0]));
-  if(!model)throw Error('AI model is not configured in config.json.');
-  const used=new Set(),missing=[];
-  let assigned=0;
-  for(let index=0;index<(project.storyboard||[]).length;index++){
-    const scene=project.storyboard[index];
-    let candidates=[];
-    try{
-      // First translate scene intent to English so the metadata shortlist is language-independent.
-      const translationPrompt=`Translate this storyboard scene into concise ENGLISH visual-search language. Describe only visible subjects, actions, objects, environment, camera framing and mood. Return JSON only: {"english_scene":"...","search_terms":["..."]}. Use 8-15 concrete English search terms. Do not translate word-for-word if a natural visual concept is clearer.\n\nScene: ${JSON.stringify({narration:scene.narration||'',visual:scene.visual||'',keywords:scene.searchKeywords||[],mood:scene.mood||'',shot_type:scene.shotType||''})}`;
-      const translated=parseAIJson(await callAutoAssignProvider(translationPrompt,provider,model,ai));
-      await new Promise(resolve=>setTimeout(resolve,Math.max(500,Number(ai.minRequestIntervalMs||1500))));
-      const englishScene={...scene,visual:[scene.visual||'',translated.english_scene||''].join(' '),
-        searchKeywords:[...(scene.searchKeywords||[]),...(Array.isArray(translated.search_terms)?translated.search_terms:[])]};
-      const ranked = rankCatalogCandidates(englishScene, orientedAssets, 30);
-      const available=ranked.filter(a=>!used.has(a.id));
-      candidates=(available.length?available:ranked).slice(0,20);
-      const prompt=`Match one storyboard scene to the most visually relevant stock video. Use ENGLISH concepts and visual meaning. Ignore filename-only coincidences when the visual description disagrees. Only use the supplied completed visual-analysis records. Do not infer anything from audio or on-screen text.
 
-ENGLISH SEARCH INTERPRETATION:
-${JSON.stringify({english_scene:translated.english_scene||'',search_terms:translated.search_terms||[]})}
+async function aiAssignMediaToStoryboard(project) {
+  const assets = loadCompletedCatalogAssets();
 
-ORIGINAL STORYBOARD SCENE:
-${JSON.stringify({scene_id:scene.id||String(index+1),narration:scene.narration||'',visual:scene.visual||'',search_keywords:scene.searchKeywords||[],mood:scene.mood||'',shot_type:scene.shotType||''})}
+  if (!assets.length) {
+    throw Error(
+      `Tidak ada video berstatus completed yang valid di ${mediaLibraryPath()}. ` +
+      'Periksa MEDIA_ROOT dan file.path pada katalog.'
+    );
+  }
+
+  const ai = cfg.ai || { provider: 'openrouter' };
+  const provider = selectedProvider(ai);
+
+  if (!['openrouter', 'ollama'].includes(provider)) {
+    throw Error(`Unsupported AI provider: ${provider}`);
+  }
+
+  const models = Array.isArray(ai.models) && ai.models.length
+    ? ai.models
+    : [ai.model || ''];
+
+  const model = provider === 'ollama'
+    ? (
+        project.settings?.ollamaModel ||
+        cfg.ollama?.model ||
+        'llama3:latest'
+      )
+    : (
+        models.includes(project.settings?.aiModel)
+          ? project.settings.aiModel
+          : (ai.model || models[0])
+      );
+
+  if (!model) {
+    throw Error('AI model is not configured in config.json.');
+  }
+
+  const targetOrientation =
+    project.settings?.orientation === 'portrait'
+      ? 'portrait'
+      : 'landscape';
+
+  const orientationSelection = filterAssetsByOrientation(
+    assets,
+    targetOrientation
+  );
+
+  const orientedAssets = orientationSelection.assets;
+
+  if (!orientedAssets.length) {
+    throw Error(
+      `Tidak ada kandidat stock untuk orientasi ${targetOrientation}.`
+    );
+  }
+
+  const used = new Set();
+  const missing = [];
+
+  let assigned = 0;
+  let reused = 0;
+
+  const storyboard = project.storyboard || [];
+
+  for (let index = 0; index < storyboard.length; index++) {
+    const scene = storyboard[index];
+
+    let candidates = [];
+
+    try {
+      // Langsung ranking menggunakan metadata scene.
+      // Tidak perlu request AI tambahan untuk menerjemahkan scene.
+      const ranked = rankCatalogCandidates(
+        scene,
+        orientedAssets,
+        30
+      );
+
+      // Hindari penggunaan stock yang sudah dipakai.
+      const unused = ranked.filter(asset => !used.has(asset.id));
+
+      // Gunakan ulang hanya jika seluruh kandidat sudah terpakai.
+      const available = unused.length ? unused : ranked;
+
+      candidates = available.slice(0, 20);
+
+      if (!candidates.length) {
+        throw Error('Tidak ditemukan kandidat stock video.');
+      }
+
+      const candidateData = candidates.map(asset => ({
+        asset_id: asset.id,
+        title: asset.title,
+        description: asset.description,
+        summary: asset.summary,
+        objects: asset.objects,
+        activities: asset.activities,
+        environment: asset.environment,
+        location_type: asset.location_type,
+        mood: asset.mood,
+        tags: asset.tags,
+        keywords: asset.keywords,
+        categories: asset.categories,
+        story_uses: asset.story_uses,
+        filename: asset.filename,
+        relative_path: asset.relative,
+        width: asset.width,
+        height: asset.height,
+        orientation: asset.orientation
+      }));
+
+      const prompt = `
+You are an expert stock-footage matching assistant.
+
+Choose the most visually relevant stock video for the storyboard scene.
+
+TARGET VIDEO ORIENTATION:
+${targetOrientation}
+
+ORIENTATION RULES:
+- Prefer ${targetOrientation} videos.
+- Square and unknown orientation are acceptable fallbacks.
+- Opposite orientation candidates are supplied only when no preferred orientation exists.
+- Do not reject a visually relevant candidate merely because its filename or folder name looks unrelated.
+- Use the actual visual-analysis metadata.
+- Do not invent asset IDs.
+
+STORYBOARD SCENE:
+${JSON.stringify({
+  scene_id: scene.id || String(index + 1),
+  narration: scene.narration || '',
+  visual: scene.visual || '',
+  search_keywords: scene.searchKeywords || [],
+  mood: scene.mood || '',
+  shot_type: scene.shotType || ''
+})}
 
 AVAILABLE COMPLETED STOCK VIDEOS:
-${JSON.stringify(
-  candidates.map(a => ({
-    asset_id: a.id,
-    title: a.title,
-    description: a.description,
-    summary: a.summary,
-    objects: a.objects,
-    activities: a.activities,
-    environment: a.environment,
-    location_type: a.location_type,
-    mood: a.mood,
-    tags: a.tags,
-    keywords: a.keywords,
-    categories: a.categories,
-    story_uses: a.story_uses,
-    filename: a.filename,
-    relative_path: a.relative,
-    width: a.width,
-    height: a.height,
-    orientation: a.orientation
-  }))
-)}
+${JSON.stringify(candidateData)}
 
-Choose exactly one asset only if it is genuinely relevant to the scene. Prefer visual action, objects, environment and mood over loose keyword overlap. Avoid reusing an asset already assigned to a previous scene if another relevant candidate exists. If none is suitable, return null. Respond in JSON only:
-{"asset_id":"exact supplied asset_id or null","reason":"brief explanation in English","confidence":0.0}`;
-      const content=await callAutoAssignProvider(prompt,provider,model,ai);
-      const result=parseAIJson(content);
-      const chosen=assets.find(a=>a.id===String(result.asset_id||''));
-      if(chosen&&candidates.some(a=>a.id===chosen.id)&&Number(result.confidence??0.65)>=0.35){
-        scene.video=null;delete scene.mediaFiles;delete scene.mediaPaths;
-        scene.mediaPath=chosen.path;scene.mediaFile=chosen.relative;scene.mediaCategory=chosen.category;
-        scene.mediaDuration=chosen.duration;scene.assetReady=true;scene.assetStatus='assigned';
-        scene.assetMatchProvider=provider;scene.assetMatchModel=model;
-        scene.assetMatchConfidence=Number(result.confidence??0.65);
-        scene.assetReason=`AI match: ${String(result.reason||'Visually relevant stock footage.').slice(0,240)}`;
-        scene.assetCandidates=[];
-        used.add(chosen.id);assigned++;
-      }else{
-        scene.video=null;delete scene.mediaFiles;delete scene.mediaPaths;
-        scene.mediaPath=null;scene.mediaFile=null;scene.assetReady=false;scene.assetStatus='missing';
-        scene.assetReason=String(result.reason||'AI found no sufficiently relevant completed stock video.').slice(0,300);
-        scene.assetCandidates=candidates.slice(0,5).map(a=>({file:a.relative,title:a.title}));
-        missing.push({part:scene.part||index+1,scene:scene.visual||scene.narration||'',keywords:scene.searchKeywords||[],reason:scene.assetReason,candidates:scene.assetCandidates});
+MATCHING PRIORITY:
+1. Visual subject and action.
+2. Objects and environment.
+3. Scene meaning and context.
+4. Mood and camera perspective.
+5. Orientation compatibility.
+
+Select exactly one asset only if it is genuinely relevant.
+If none is suitable, return null.
+
+Return JSON only:
+{
+  "asset_id": "exact supplied asset_id or null",
+  "reason": "brief explanation",
+  "confidence": 0.0
+}
+`;
+
+      const content = await callAutoAssignProvider(
+        prompt,
+        provider,
+        model,
+        ai
+      );
+
+      const result = parseAIJson(content);
+
+      const chosen = candidates.find(
+        asset => asset.id === String(result.asset_id || '')
+      );
+
+      const confidence = Number(result.confidence ?? 0);
+
+      if (
+        chosen &&
+        Number.isFinite(confidence) &&
+        confidence >= 0.35
+      ) {
+        const wasUsed = used.has(chosen.id);
+
+        scene.video = null;
+        delete scene.mediaFiles;
+        delete scene.mediaPaths;
+
+        scene.mediaPath = chosen.path;
+        scene.mediaFile = chosen.relative;
+        scene.mediaCategory = chosen.category;
+        scene.mediaDuration = chosen.duration;
+
+        scene.assetReady = true;
+        scene.assetStatus = 'assigned';
+
+        scene.assetMatchProvider = provider;
+        scene.assetMatchModel = model;
+        scene.assetMatchConfidence = confidence;
+
+        scene.assetOrientation = chosen.orientation;
+        scene.assetDimensions = {
+          width: chosen.width,
+          height: chosen.height
+        };
+
+        scene.assetReason =
+          `AI match: ${String(
+            result.reason || 'Visually relevant stock footage.'
+          ).slice(0, 200)} ` +
+          `(orientation: ${chosen.orientation}, ` +
+          `${chosen.width}x${chosen.height}` +
+          `${wasUsed ? ', stock reused' : ''}).`;
+
+        scene.assetCandidates = [];
+
+        if (wasUsed) {
+          reused++;
+        }
+
+        used.add(chosen.id);
+        assigned++;
+      } else {
+        scene.video = null;
+        delete scene.mediaFiles;
+        delete scene.mediaPaths;
+
+        scene.mediaPath = null;
+        scene.mediaFile = null;
+        scene.assetReady = false;
+        scene.assetStatus = 'missing';
+
+        scene.assetReason = String(
+          result.reason ||
+          'AI found no sufficiently relevant completed stock video.'
+        ).slice(0, 300);
+
+        scene.assetCandidates = candidates.slice(0, 5).map(asset => ({
+          file: asset.relative,
+          title: asset.title,
+          orientation: asset.orientation,
+          width: asset.width,
+          height: asset.height
+        }));
+
+        missing.push({
+          part: scene.part || index + 1,
+          scene: scene.visual || scene.narration || '',
+          keywords: scene.searchKeywords || [],
+          reason: scene.assetReason,
+          candidates: scene.assetCandidates
+        });
       }
-    }catch(error){
-      scene.video=null;delete scene.mediaFiles;delete scene.mediaPaths;
-      scene.mediaPath=null;scene.mediaFile=null;scene.assetReady=false;scene.assetStatus='missing';
-      scene.assetReason=`AI matching error: ${error.message}`.slice(0,300);
-      scene.assetCandidates=candidates.slice(0,5).map(a=>({file:a.relative,title:a.title}));
-      missing.push({part:scene.part||index+1,scene:scene.visual||scene.narration||'',keywords:scene.searchKeywords||[],reason:scene.assetReason,candidates:scene.assetCandidates});
+    } catch (error) {
+      scene.video = null;
+      delete scene.mediaFiles;
+      delete scene.mediaPaths;
+
+      scene.mediaPath = null;
+      scene.mediaFile = null;
+      scene.assetReady = false;
+      scene.assetStatus = 'missing';
+
+      scene.assetReason =
+        `AI matching error: ${error.message}`.slice(0, 300);
+
+      scene.assetCandidates = candidates.slice(0, 5).map(asset => ({
+        file: asset.relative,
+        title: asset.title,
+        orientation: asset.orientation
+      }));
+
+      missing.push({
+        part: scene.part || index + 1,
+        scene: scene.visual || scene.narration || '',
+        keywords: scene.searchKeywords || [],
+        reason: scene.assetReason,
+        candidates: scene.assetCandidates
+      });
     }
-    // Respect provider rate limits without blocking the UI with uncontrolled parallel requests.
-    if(index<(project.storyboard.length-1))await new Promise(resolve=>setTimeout(resolve,Math.max(500,Number(ai.minRequestIntervalMs||1500))));
+
+    // Jeda hanya antar request AI, bukan setelah scene terakhir.
+    if (index < storyboard.length - 1) {
+      await new Promise(resolve =>
+        setTimeout(
+          resolve,
+          Math.max(0, Number(ai.minRequestIntervalMs ?? 500))
+        )
+      );
+    }
   }
-  project.assetReport={mediaRoot:mediaRoot(),mediaLibrary:mediaLibraryPath(),orientation:project.settings?.orientation||'landscape',
-    available:assets.length,assigned,missingCount:missing.length,missing,provider,model,generatedAt:new Date().toISOString()};
+
+  project.assetReport = {
+    mediaRoot: mediaRoot(),
+    mediaLibrary: mediaLibraryPath(),
+
+    orientation: targetOrientation,
+
+    available: assets.length,
+    orientationCandidates: orientedAssets.length,
+
+    orientationBreakdown: {
+      portrait: assets.filter(a => a.orientation === 'portrait').length,
+      landscape: assets.filter(a => a.orientation === 'landscape').length,
+      square: assets.filter(a => a.orientation === 'square').length,
+      unknown: assets.filter(a => a.orientation === 'unknown').length
+    },
+
+    oppositeOrientationFallback: orientationSelection.fallback,
+
+    assigned,
+    reused,
+    missingCount: missing.length,
+    missing,
+
+    provider,
+    model,
+    generatedAt: new Date().toISOString()
+  };
+
   return project.assetReport;
 }
+
 // const words=s=>String(s||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9\s-]/g,' ').split(/[\s-]+/).filter(x=>x.length>2);
 // function chooseMediaForScene(part,items,orientation,used){
 //   const portrait=orientation==='portrait';
